@@ -1,0 +1,11 @@
+node_modules/
+/node_modules/
+/dist/
+/.cache/
+/.next/         
+
+# Environment variables
+.env
+
+# Dependencies
+node_modules/
