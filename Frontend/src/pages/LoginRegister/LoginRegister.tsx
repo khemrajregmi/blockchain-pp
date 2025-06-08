@@ -106,7 +106,7 @@ export function LoginRegister() {
 
   useEffect(() => {
     // Get the popup message from the local storage
-    setPopupMessage(window.localStorage.getItem("message"));
+    setPopupMessage(window.localStorage.getItem("message") || "");
     setPopupVisible(false);
   }, []);
 
@@ -121,11 +121,9 @@ export function LoginRegister() {
   function login() {
     fetch("http://127.0.0.1:5000/login-user", {
       method: "POST",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
         email,
@@ -136,7 +134,7 @@ export function LoginRegister() {
       .then((data) => {
         if (data.status == "ok") {
           window.localStorage.setItem("token", data.data);
-          window.localStorage.setItem("loggedIn", true);
+          window.localStorage.setItem("loggedIn", "true");
 
           window.location.href = "./../..";
         } else {
@@ -149,11 +147,9 @@ export function LoginRegister() {
   function register() {
     fetch("http://127.0.0.1:5000/register", {
       method: "POST",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
         fname,
@@ -167,7 +163,7 @@ export function LoginRegister() {
       .then((data) => {
         if (data.status == "ok") {
           window.localStorage.setItem("token", data.data);
-          window.localStorage.setItem("loggedIn", true);
+          window.localStorage.setItem("loggedIn", "true");
 
           window.location.href = "./../..";
         } else {

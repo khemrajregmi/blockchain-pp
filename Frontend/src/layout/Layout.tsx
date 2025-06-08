@@ -148,7 +148,6 @@ export function Layout() {
 
     fetch(`${API_BASE_URL}/getEvents`, {
         method: "POST",
-        crossDomain: true,
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -173,7 +172,6 @@ export function Layout() {
 
     fetch(`${API_BASE_URL}/getFriendRequests`, {
         method: "POST",
-        crossDomain: true,
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -203,7 +201,8 @@ export function Layout() {
             margin: "10vh auto",
             borderColor: "red",
           }}
-          size={10}
+          width={200}
+          height={10}
         />
       )}
       {loaded && (

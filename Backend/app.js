@@ -10,7 +10,12 @@ app.use(fileupload());
 app.use(express.static("public"));
 app.use(express.json());
 const cors = require("cors");
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:3002", "http://127.0.0.1:3002"], // allow your frontend dev server
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
 const bcrypt = require("bcryptjs");
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
