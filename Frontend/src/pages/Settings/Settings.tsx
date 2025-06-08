@@ -1,33 +1,38 @@
 import "./styles.css";
-
 import { Tab } from "@headlessui/react";
-
 import { PageView } from "layout/PageView";
 import axios from "axios";
 import { UploadAvatar } from "components/UploadAvatar/UploadAvatar";
 import InputComponent from "components/InputComponent";
 import { Switch } from "components/Switch";
 import { useState, useEffect } from "react";
+import { API_BASE_URL } from "utils";
 
-function AccountSettings({userData}: any) {
-  const [profilePicPath, setProfilePicPath] = useState("");
-  const [firstName, setFirstName] = useState()
-  const [lastName, setLastName] = useState()
-  const [userName, setUserName] = useState()
-  const [firstNameError, setFirstNameError] = useState(false)
-  const [lastNameError, setLastNameError] = useState(false)
-  const [userNameError, setUserNameError] = useState(false)
+interface UserData {
+  profilePic: string;
+  fname: string;
+  lname: string;
+  email: string;
+  [key: string]: any;
+}
+
+function AccountSettings({ userData }: { userData: UserData }) {
+  const [profilePicPath, setProfilePicPath] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
+  const [firstNameError, setFirstNameError] = useState<boolean>(false);
+  const [lastNameError, setLastNameError] = useState<boolean>(false);
+  const [userNameError, setUserNameError] = useState<boolean>(false);
 
   const updateAccountSettings = () => {
-    if (!firstName) setFirstNameError(true)
-    if (!lastName) setLastNameError(true)
-    if (!userName) setUserNameError(true)
-    if (!firstName || !lastName || !userName) return
-    console.log(firstName, lastName, userName)
+    if (!firstName) setFirstNameError(true);
+    if (!lastName) setLastNameError(true);
+    if (!userName) setUserNameError(true);
+    if (!firstName || !lastName || !userName) return;
 
-    fetch("http://127.0.0.1:8000/updateProfile", {
+    fetch(`${API_BASE_URL}/updateProfile`, {
       method: "POST",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json"
@@ -40,36 +45,30 @@ function AccountSettings({userData}: any) {
         profilePic: profilePicPath
       }),
     })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.data == "token expired") {
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data == "token expired") {
           window.localStorage.clear();
           window.location.href = "../../login";
-      }
-      else {
-        if (data.status == "ok") {
         }
-      }
-    });
-  }
+      });
+  };
 
-  const saveProfilePic = async (e) => {
+  const saveProfilePic = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
     let file = e.target.files[0];
     let fileName = e.target.files[0].name;
 
     const formData = new FormData();
     formData.append("file", file);
     formData.append("fileName", fileName);
-
-    // Add the token to the body of the request
-    formData.append("token", window.localStorage.getItem("token"));
+    formData.append("token", window.localStorage.getItem("token") || "");
 
     try {
       const res = await axios.post(
-        "http://127.0.0.1:5000/picUpload",
+        `${API_BASE_URL}/picUpload`,
         formData
       );
-      console.log(res);
       setProfilePicPath(res.data.data);
     } catch (ex) {
       console.log(ex);
@@ -78,12 +77,12 @@ function AccountSettings({userData}: any) {
 
   useEffect(() => {
     if (userData) {
-      setProfilePicPath(userData.profilePic)
-      setFirstName(userData.fname)
-      setLastName(userData.lname)
-      setUserName(userData.email)
+      setProfilePicPath(userData.profilePic || "");
+      setFirstName(userData.fname || "");
+      setLastName(userData.lname || "");
+      setUserName(userData.email || "");
     }
-  }, [userData])
+  }, [userData]);
 
   return (
     <section>
@@ -92,34 +91,16 @@ function AccountSettings({userData}: any) {
         <h2 className='min-w-0 overflow-hidden text-ellipsis text-lg font-medium'>
           Upload profile picture
         </h2>
-        <input style={{opacity: "0"}} onChange={saveProfilePic} type="file" name="file" accept="image/png, image/gif, image/jpeg" id="avatarFileInput" className="input-file" />
+        <input style={{ opacity: "0" }} onChange={saveProfilePic} type="file" name="file" accept="image/png, image/gif, image/jpeg" id="avatarFileInput" className="input-file" />
       </div>
 
       <div className='mt-6 flex flex-wrap items-center gap-x-5 gap-y-6'>
         <InputComponent label='First name' onChange={setFirstName} init={firstName} placeholder='First name' type='text' style='settings w-full md:w-80' showError={firstNameError} />
-        {/* <div className='app-textbox settings w-full md:w-80'>
-          <label>First name</label>
-          <div className='app-textbox-area'>
-          <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder='First name' />
-          </div>
-        </div> */}
         <InputComponent label='Last name' onChange={setLastName} init={lastName} placeholder='Last name' type='text' style='settings w-full md:w-80' showError={lastNameError} />
-        {/* <div className='app-textbox settings w-full md:w-80'>
-          <label>Last name</label>
-          <div className='app-textbox-area'>
-            <input value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder='Last name' />
-          </div>
-        </div> */}
       </div>
 
       <div className='mt-6'>
-      <InputComponent label='User name' onChange={setUserName} init={userName} placeholder='User name' type='text' style='settings w-full md:w-80' showError={userNameError} />
-        {/* <div className='app-textbox settings w-full md:w-80'>
-          <label>User name</label>
-          <div className='app-textbox-area'>
-            <input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder='First name' />
-          </div>
-        </div> */}
+        <InputComponent label='User name' onChange={setUserName} init={userName} placeholder='User name' type='text' style='settings w-full md:w-80' showError={userNameError} />
       </div>
 
       <button onClick={updateAccountSettings} className='mt-12 flex w-full items-center justify-center rounded-half bg-blue-high px-20 py-3 text-dim-black hover:bg-blue-high/80 md:w-auto'>
@@ -129,11 +110,16 @@ function AccountSettings({userData}: any) {
   );
 }
 
+interface SecuritySettingsProps {
+  onOldPasswordChange: (v: string) => void;
+  onNewPasswordChange: (v: string) => void;
+  onSubmit: () => void;
+}
 function SecuritySettings({
   onOldPasswordChange,
   onNewPasswordChange,
   onSubmit
-}: any) {
+}: SecuritySettingsProps) {
   return (
     <section>
       <div className='app-textbox settings w-full md:w-[42rem]'>
@@ -242,70 +228,54 @@ function NotificationSettings() {
 }
 
 export function Settings() {
-  const [newPassword, setNewPassword] = useState("");
-  const [oldPassword, setOldPassword] = useState("");
-  const [userData, setUserData] = useState();
-
-  const [popupMessage, setPopupMessage] = useState("");
-  const [popupVisible, setPopupVisible] = useState(false);
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [oldPassword, setOldPassword] = useState<string>("");
+  const [userData, setUserData] = useState<UserData | undefined>(undefined);
+  const [popupMessage, setPopupMessage] = useState<string>("");
+  const [popupVisible, setPopupVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/getUserData", {
+    fetch(`${API_BASE_URL}/getUserData`, {
       method: "POST",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
         token: window.localStorage.getItem("token"),
       }),
     })
-    .then((res) => res.json())
-    .then((data) => {
-      setUserData(data.data);
-      
-      if (data.data == "token expired") {
-        if (window.location.pathname !== "/login") {
-          window.localStorage.clear();
-          window.location.href = "../../login";
-        }
-      }
-    });
+      .then((res) => res.json())
+      .then((data) => {
+        setUserData(data.data);
 
-}, []);
+        if (data.data == "token expired") {
+          if (window.location.pathname !== "/login") {
+            window.localStorage.clear();
+            window.location.href = "../../login";
+          }
+        }
+      });
+  }, []);
 
   useEffect(() => {
-    if(popupMessage != "" && popupMessage != undefined && popupMessage != null){
-        console.log("popupMessage: ", popupMessage);
-
-        // Set the popup visible to true
-        setPopupVisible(true);
-
-        // Remove the popup message from the local storage
-        window.localStorage.removeItem("message");
-
-        // Make the popup visible for 5 seconds
-        setTimeout(() => {
-            setPopupVisible(false);
-        }
-        , 5000);
-
-        console.log("popupVisible: ", popupVisible);
-    } else {
+    if (popupMessage !== "" && popupMessage !== undefined && popupMessage !== null) {
+      setPopupVisible(true);
+      window.localStorage.removeItem("message");
+      setTimeout(() => {
         setPopupVisible(false);
+      }, 5000);
+    } else {
+      setPopupVisible(false);
     }
-}, [popupMessage]);
+  }, [popupMessage]);
 
   function updatePassword() {
-    fetch("http://127.0.0.1:5000/changePassword", {
+    fetch(`${API_BASE_URL}/changePassword`, {
       method: "POST",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
         token: window.localStorage.getItem("token"),
@@ -341,7 +311,7 @@ export function Settings() {
         </Tab.List>
         <Tab.Panels>
           <Tab.Panel>
-            <AccountSettings userData={userData} />
+            <AccountSettings userData={userData as UserData} />
           </Tab.Panel>
           <Tab.Panel>
             <SecuritySettings onSubmit={updatePassword} onOldPasswordChange={setOldPassword} onNewPasswordChange={setNewPassword} />

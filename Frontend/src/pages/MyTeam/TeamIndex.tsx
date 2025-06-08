@@ -1,8 +1,6 @@
 import cx from "classnames";
 import { PageView } from "layout/PageView";
-
 import { MembersAndLineup } from "components/MembersAndLineup/MembersAndLineup";
-
 import TeamCover from "assets/team-cover.jpg";
 import { ClockIcon } from "components/adaptive-icons/PinMarker";
 import { PinMarkerIcon } from "components/adaptive-icons/Clock";
@@ -14,10 +12,22 @@ import Team10 from "assets/team-10.png";
 import Team11 from "assets/team-11.png";
 import CopyIcon from "assets/copy.svg";
 import { useNavigate } from "react-router-dom";
-import React, { Component, useEffect, useState } from "react";
-import { useMenu, API_BASE_URL } from "utils";
+import React, { useEffect, useState } from "react";
+import { useMenu } from "utils";
+import { API_BASE_URL } from "utils";
 import { Menu, Transition } from "@headlessui/react";
 import { commonTransitionProps } from "components/PanelTransition";
+
+// Define TeamData type (adjust fields as needed)
+type TeamData = {
+  id: string;
+  name: string;
+  profileBanner: string;
+  profilePic: string;
+  createdAt: string;
+  inviteCode: string;
+  // Add other fields as required
+};
 
 function ImageActions() {
   const m = useMenu();
@@ -266,31 +276,21 @@ function Information() {
 export function TeamIndex() {
   const navigate = useNavigate();
 
-  const [selectedTeamId, setSelectedTeamId] = useState(window.location.href.split("id=")[1]);
-
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(window.location.href.split("id=")[1] || "");
   const [loaded, setLoaded] = useState(false);
-
   const [loadedTeamData, setLoadedTeamData] = useState(false);
-
-  const [teamsData, setTeamsData] = useState([]); // This is the list of teams that the user is a part of
-
-  const [teamData, setTeamData] = useState("");
-  const [isPublicView, setPublicView] = useState(false); // The Public View is the view that is seen by other users, not the logged in user
-
-  const [sportsData, setSportsData] = useState([]); // This is the list of sports that exist in the database
-  const [selectedSportId, setSelectedSportId] = useState(""); // This is the sport that is selected by the user
-
-  const [membersData, setMembersData] = useState([]); // This is the list of members of the team
-
-  const [userData, setUserData] = useState("");
+  const [teamsData, setTeamsData] = useState<Team[]>([]);
+  const [teamData, setTeamData] = useState<TeamData | null>(null);
+  const [isPublicView, setPublicView] = useState(false);
+  const [sportsData, setSportsData] = useState<any[]>([]);
+  const [selectedSportId, setSelectedSportId] = useState<string>("");
+  const [membersData, setMembersData] = useState<MemberData[]>([]);
+  const [userData, setUserData] = useState<any>("");
   const [admin, setAdmin] = useState(false);
-
-  const [teamAdmin, setTeamAdmin] = useState(false); // This is true if the logged in user is an admin of the team
-
-  const [popupMessage, setPopupMessage] = useState("");
+  const [teamAdmin, setTeamAdmin] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<string | null>("");
   const [popupVisible, setPopupVisible] = useState(false);
-
-  const [teamInviteLink, setTeamInviteLink] = useState("");
+  const [teamInviteLink, setTeamInviteLink] = useState<string>("");
 
   const closePopup = function() {
       // This function is called when the user clicks on the close button of the popup
@@ -303,7 +303,8 @@ export function TeamIndex() {
       // This function is called when the user selects a sport from the dropdown teamDropdown
 
       // Get the teamId of the selected team
-      var teamId = document.getElementById("teamDropdown").value;
+      const teamDropdown = document.getElementById("teamDropdown") as HTMLSelectElement | null;
+      var teamId = teamDropdown ? teamDropdown.value : "";
 
       if(teamId == "new") {
           // If the user selects "Create a new team" then redirect them to the Create Team page
@@ -315,8 +316,13 @@ export function TeamIndex() {
 
   }
 
-  function setOption(selectElement, value) {
-      return [...selectElement.options].some((option, index) => {
+  interface SelectOption {
+    value: string;
+    // Add other fields if needed
+  }
+
+  function setOption(selectElement: HTMLSelectElement, value: string): boolean {
+      return [...selectElement.options].some((option: HTMLOptionElement, index: number) => {
           if (option.value == value) {
               selectElement.selectedIndex = index;
               return true;
@@ -324,13 +330,26 @@ export function TeamIndex() {
       });
   }
 
-  const setSelectedTeamById = function(teamId) {
+  interface Team {
+    id: string;
+    name: string;
+    sportsType: string;
+    // Add other fields as required
+  }
+
+  interface MemberData {
+    id: string;
+    role: string;
+    // Add other fields as required
+  }
+
+  const setSelectedTeamById = function(teamId: string) {
       // Set the selectedTeamId to the teamId passed in
       setSelectedTeamId(teamId);
 
       // Wait for the teamsData to be loaded
       if(loaded) {   
-          setOption(document.getElementById("teamDropdown"), teamId);
+          setOption(document.getElementById("teamDropdown") as HTMLSelectElement, teamId);
       }
   }
 
@@ -340,7 +359,8 @@ export function TeamIndex() {
       setLoadedTeamData(false);
 
       // Get the sportId of the selected sport
-      var sportId = document.getElementById("sportsTypesDropdown").value;
+      const sportsTypesDropdown = document.getElementById("sportsTypesDropdown") as HTMLSelectElement | null;
+      var sportId = sportsTypesDropdown ? sportsTypesDropdown.value : "";
 
       // Set the selectedSportId to the sportId of the selected sport
       setSelectedSportId(sportId);
@@ -365,13 +385,11 @@ export function TeamIndex() {
   }
 
   useEffect(() => {
-      fetch("http://127.0.0.1:5000/getUserData", {
+      fetch(`${API_BASE_URL}/getUserData`, {
               method: "POST",
-              crossDomain: true,
               headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                Accept: "application/json",
               },
               body: JSON.stringify({
               token: window.localStorage.getItem("token"),
@@ -379,38 +397,30 @@ export function TeamIndex() {
       })
       .then((res) => res.json())
       .then((data) => {
-          if (data.data.userType == "Admin") {
-              setAdmin(true);
-          }
-  
-          setUserData(data.data);
-          
-          if (data.data == "token expired") {
-              window.localStorage.clear();
-              window.location.href = "../../../login";
-          }
-
+        if (data.data?.userType === "Admin") {
+          setAdmin(true);
+        }
+        setUserData(data.data);
+        if (data.data === "token expired") {
+          window.localStorage.clear();
+          window.location.href = "../../../login";
+        }
       });
 
-      // Get the list of sports that exist in the database
-      fetch("http://127.0.0.1:5000/getSports", {
-          method: "GET",
-          crossDomain: true,
-          headers: {
+      fetch(`${API_BASE_URL}/getSports`, {
+        method: "GET",
+        headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-          }
+        }
       })
-      .then((res) => res.json())
-      .then((data) => {
+        .then((res) => res.json())
+        .then((data) => {
           setSportsData(data.data);
+          setSelectedSportId(data.data[0]?.id || "");
+        });
 
-          setSelectedSportId(data.data[0].id);
-      });
-
-      // Get the popup message from the local storage
-      setPopupMessage(window.localStorage.getItem("message"));
+      setPopupMessage(window.localStorage.getItem("message") || "");
       setPopupVisible(false);
   }, []);
 
@@ -437,9 +447,11 @@ export function TeamIndex() {
   }, [popupMessage]);
 
   useEffect(() => {
-      if(selectedTeamId == "" && id != undefined) {
-          setSelectedTeamById(id);
-      } else if (selectedTeamId == "" && id == undefined) {
+      // Try to get team id from URL if available
+      const urlTeamId = window.location.href.split("id=")[1];
+      if(selectedTeamId == "" && urlTeamId !== undefined) {
+          setSelectedTeamById(urlTeamId);
+      } else if (selectedTeamId == "" && urlTeamId === undefined) {
           if(teamsData.length > 0) {
               setSelectedTeamById(teamsData[0].id);
 
@@ -453,72 +465,64 @@ export function TeamIndex() {
   }, [selectedTeamId]);
 
   function updateTeamData() {
-      if(selectedTeamId != "") {
-          fetch(`${API_BASE_URL}/getTeamData/` + selectedTeamId, {
-              method: "POST",
-              headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              },
-              body: JSON.stringify({
-              token: window.localStorage.getItem("token"),
-          }),
-          })
-          .then((res) => res.json())
-          .then((data) => {
-              setTeamData(data.data);
+    if (selectedTeamId !== "") {
+      fetch(`${API_BASE_URL}/getTeamData/${selectedTeamId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          token: window.localStorage.getItem("token"),
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setTeamData(data.data);
 
-              // Create the team invite link
-              // Get the current base url
-              var baseUrl = window.location.href;
+          // Create the team invite link
+          var baseUrl = window.location.href;
+          baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
+          baseUrl = baseUrl.replace("/Teams", "");
+          setTeamInviteLink(baseUrl + "/JoinTeam/" + data.data.id + "/" + data.data.inviteCode);
 
-              // Only get the base url without any page names
-              baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
-              baseUrl = baseUrl.replace("/Teams", "");
+          setLoaded(true);
 
-              setTeamInviteLink(baseUrl + "/JoinTeam/" + data.data.id + "/" + data.data.inviteCode);
-              
-              setLoaded(true);
-
-              // Wait at least 500ms before setting the loadedTeamData to true
-              setTimeout(() => {
-                  setLoadedTeamData(true);
-              }, 500);
-          });
-      }
+          setTimeout(() => {
+            setLoadedTeamData(true);
+          }, 500);
+        });
+    }
   }
 
   useEffect(() => {
-      // Get the list of members of the team
-      if(selectedTeamId != "") {
-          fetch("http://127.0.0.1:5000/getTeamMembers/", {
-              method: "POST",
-              crossDomain: true,
-              headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              "Access-Control-Allow-Origin": "*",
-              },
-              body: JSON.stringify({
-                  teamId: selectedTeamId,
-                  token: window.localStorage.getItem("token"),
-              }),
-          })
-          .then((res) => res.json())
-          .then((data) => {
-              setMembersData(data.data);
+    // Get the list of members of the team
+    if (selectedTeamId !== "") {
+      fetch(`${API_BASE_URL}/getTeamMembers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          teamId: selectedTeamId,
+          token: window.localStorage.getItem("token"),
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setMembersData(data.data);
 
-              // Check if the user is a admin of the team
-              let isAdmin = false;
-              for(var i = 0; i < data.data.length; i++) {
-                  if(data.data[i].id == userData._id && data.data[i].role == "Admin") {
-                      isAdmin = true;
-                  }
-              }
-              setTeamAdmin(isAdmin);
+          // Check if the user is a admin of the team
+          let isAdmin = false;
+          for (let i = 0; i < data.data.length; i++) {
+            if (data.data[i].id === userData._id && data.data[i].role === "Admin") {
+              isAdmin = true;
+            }
           }
-          );
-      }
+          setTeamAdmin(isAdmin);
+        });
+    }
   }, [selectedTeamId]);
 
   return (

@@ -94,8 +94,8 @@ function Filters(props: any) {
   const { setSelectedTeam, setSelectedSport, setSelectedDate, setSearchKey, selectedTeam, selectedSport, selectedDate, searchKey } = props;
   const [searchOpen, setSearchOpen] = useState(false);
   const [filtersOpen, setfiltersOpen] = useState(false);
-  const [teams, setTeams] = useState([]);
-  const [sports, setSports] = useState([]);
+  const [teams, setTeams] = useState<{ name: string }[]>([]);
+  const [sports, setSports] = useState<{ name: string }[]>([]);
   const [showCalendar, setShowCalendar] = useState(false)
 
   const clearFilter = () => {
@@ -316,9 +316,21 @@ export function MyPlaymate() {
   const [own, setOwn] = useState(""); 
   const [friendStatus, setFriendStatus] = useState(false)
 
-  const [userData, setUserData] = useState("");
-  const [events, setEvents] = useState([]);
-  const [showedEvents, setShowedEvents] = useState([]);
+  const [userData, setUserData] = useState<any>({});
+  interface EventType {
+    id: string;
+    name: string;
+    location: string;
+    startTime: string;
+    endTime: string;
+    date: string;
+    teamName?: string;
+    sport?: string;
+    // add other fields as needed
+  }
+
+  const [events, setEvents] = useState<EventType[]>([]);
+  const [showedEvents, setShowedEvents] = useState<EventType[]>([]);
   const [friendRequests, setFriendRequests] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [selectedSport, setSelectedSport] = useState(null);

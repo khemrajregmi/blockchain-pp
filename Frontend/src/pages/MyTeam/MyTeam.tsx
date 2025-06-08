@@ -1,18 +1,17 @@
 import cx from "classnames";
-
 import { PageView } from "layout/PageView";
 import { Tab } from "@headlessui/react";
 import { TeamCreator } from "./TeamCreator";
 import { Link } from "react-router-dom";
 import PlusIcon from "assets/plus.svg";
 import SearchIcon from "assets/search.svg";
-import { API_BASE_URL } from "utils";
-
+import { API_BASE_URL } from "../../utils";
 import "./styles.css";
-import React, { Component, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
+// TeamCardProps: Remove 'key' (React handles it separately)
 interface TeamCardProps {
-  key: number,
+  teamKey: number;
   id: string;
   name: string;
   membersCount: number;
@@ -30,25 +29,23 @@ function TeamCard(props: TeamCardProps) {
         <h2 className='col-[2] text-xl font-semibold'>
           {props.name}
         </h2>
-
         <div className='mt-2 flex items-center'>
-          {
-            !!props.avatars && props.avatars.map((profilePic, index) =>
-              index < 4 &&
+          {!!props.avatars &&
+            props.avatars.map((profilePic, index) =>
+              index < 4 && (
                 <img
                   key={index}
-                  className={`${props.key !== 0 ? '-ml-2.5' : ''} box-content h-5.5 w-5.5 rounded-full border-4 border-grey-low`}
+                  className={`${props.teamKey !== 0 ? '-ml-2.5' : ''} box-content h-5.5 w-5.5 rounded-full border-4 border-grey-low`}
                   src={profilePic}
                 />
-            )
-          }
+              )
+            )}
           <p className='ml-3 text-fine'>
             <span className='text-grey-grain'>{props.membersCount}/</span>
             <span>32</span>
           </p>
         </div>
       </header>
-
       <footer className='tm-card-footer mt-4 flex flex-wrap gap-y-4'>
         <div className='stat'>
           <h3>281</h3>
@@ -59,7 +56,7 @@ function TeamCard(props: TeamCardProps) {
           <p>Win rate</p>
         </div>
         <s className='min-w-0 flex-1' />
-        <Link to={'/team/index?id='+props.id}>
+        <Link to={'/team/index?id=' + props.id}>
           <button
             className={cx(
               "self-start rounded-half px-4 py-2 text-sm",
@@ -76,21 +73,49 @@ function TeamCard(props: TeamCardProps) {
   );
 }
 
-function MyTeamGrid({teams} : any) {
+// Team interface for type safety
+interface Team {
+  id: string;
+  name: string;
+  membersCount: number;
+  avatars: string[];
+  profilePic: string;
+  [key: string]: any; // allow extra properties
+}
+
+function MyTeamGrid({ teams }: { teams: Team[] }) {
   return (
     <section className='mb-12 mt-7 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-2 desktop:grid-cols-4'>
-      {teams.map((team: any, index: number) => (
-        <TeamCard key={index} avatars={team.avatars} membersCount={team.membersCount} id={team.id} name={team.name} avatarUrl={team.profilePic} joined={true} />
+      {teams.map((team, index) => (
+        <TeamCard
+          key={team.id}
+          teamKey={index}
+          avatars={team.avatars}
+          membersCount={team.membersCount}
+          id={team.id}
+          name={team.name}
+          avatarUrl={team.profilePic}
+          joined={true}
+        />
       ))}
     </section>
   );
 }
 
-function ExploreTeamGrid({teams}: any) {
+function ExploreTeamGrid({ teams }: { teams: Team[] }) {
   return (
     <section className='mb-12 mt-7 grid grid-cols-1 gap-x-3 gap-y-3 md:grid-cols-2 desktop:grid-cols-4'>
-      {teams.map((team: any, index: number) => (
-        <TeamCard key={index} avatars={team.avatars} membersCount={team.membersCount} id={team.id} name={team.name} avatarUrl={team.profilePic} joined={true} />
+      {teams.map((team, index) => (
+        <TeamCard
+          key={team.id}
+          teamKey={index}
+          avatars={team.avatars}
+          membersCount={team.membersCount}
+          id={team.id}
+          name={team.name}
+          avatarUrl={team.profilePic}
+          joined={true}
+        />
       ))}
     </section>
   );
@@ -98,105 +123,98 @@ function ExploreTeamGrid({teams}: any) {
 
 export function MyTeam() {
   const [searchOpen, setSearchOpen] = useState(false);
-
-  
-  const [loaded, setLoaded] = useState(false);    
-
-  const [userData, setUserData] = useState("");
-  const [teams, setTeams] = useState([]);
-  const [showTeams, setShowTeams] = useState([])
-  const [allTeams, setAllTeams] = useState([]);
-  const [showAllTeams, setShowAllTeams] = useState([])
-  const [index, setIndex ] = useState(0)
-  const [searchKey, setSearchKey] = useState("")
-
+  const [loaded, setLoaded] = useState(false);
+  const [userData, setUserData] = useState<any>("");
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [showTeams, setShowTeams] = useState<Team[]>([]);
+  const [allTeams, setAllTeams] = useState<Team[]>([]);
+  const [showAllTeams, setShowAllTeams] = useState<Team[]>([]);
+  const [index, setIndex] = useState(0);
+  const [searchKey, setSearchKey] = useState("");
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-      fetch(`${API_BASE_URL}/getUserData`, {
-          method: "POST",
-          headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          },
-          body: JSON.stringify({
-          token: window.localStorage.getItem("token"),
-          }),
-      })
+    fetch(`${API_BASE_URL}/getUserData`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        token: window.localStorage.getItem("token"),
+      }),
+    })
       .then((res) => res.json())
       .then((data) => {
-          if (data.data.userType == "Admin") {
-              setAdmin(true);
+        if (data.data?.userType === "Admin") {
+          setAdmin(true);
+        }
+        setUserData(data.data);
+        if (data.data === "token expired") {
+          if (window.location.pathname !== "/login") {
+            window.localStorage.clear();
+            window.location.href = "../../login";
           }
-  
-          setUserData(data.data);
-
-          if (data.data == "token expired") {
-            if (window.location.pathname !== "/login") {
-              window.localStorage.clear();
-              window.location.href = "../../login";
-            }
-          }
-
+        }
       });
-
   }, []);
 
   useEffect(() => {
-    if(!userData) return;
+    if (!userData) return;
 
     fetch(`${API_BASE_URL}/getTeams`, {
-        method: "POST",
-        headers: {
+      method: "POST",
+      headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        },
-        body: JSON.stringify({
+      },
+      body: JSON.stringify({
         token: window.localStorage.getItem("token"),
-        }),
+      }),
     })
-    .then((res) => res.json())
-    .then((data) => {
+      .then((res) => res.json())
+      .then((data) => {
         setTeams(data.data);
         setShowTeams(data.data);
         setLoaded(true);
-    }
-    );
+      });
 
     fetch(`${API_BASE_URL}/getAllTeams`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          token: window.localStorage.getItem("token"),
-        }),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        token: window.localStorage.getItem("token"),
+      }),
     })
-    .then((res) => res.json())
-    .then((data) => {
+      .then((res) => res.json())
+      .then((data) => {
         setAllTeams(data.data);
-        setShowAllTeams(data.data)
+        setShowAllTeams(data.data);
         setLoaded(true);
-    }
-    );
-
+      });
   }, [userData]);
 
   useEffect(() => {
-    setSearchKey('')
-  }, [index])
+    setSearchKey("");
+  }, [index]);
 
   const onSearch = (key: string) => {
-    setSearchKey(key)
+    setSearchKey(key);
     if (!index) {
-      const newTeams = teams.filter(team => team.name.toString().toLowerCase().indexOf(key.toString().toLowerCase()) > -1)
-      setShowTeams(newTeams)
+      const newTeams = teams.filter((team) =>
+        team.name.toString().toLowerCase().includes(key.toString().toLowerCase())
+      );
+      setShowTeams(newTeams);
     } else {
-      const newAllTeams = allTeams.filter(team => team.name.toString().toLowerCase().indexOf(key.toString().toLowerCase()) > -1)
-      setShowAllTeams(newAllTeams)
+      const newAllTeams = allTeams.filter((team) =>
+        team.name.toString().toLowerCase().includes(key.toString().toLowerCase())
+      );
+      setShowAllTeams(newAllTeams);
     }
-  }
+  };
 
   return (
     <PageView
@@ -204,7 +222,7 @@ export function MyTeam() {
       actions={
         <>
           <button
-            onClick={() => setSearchOpen(x => !x)}
+            onClick={() => setSearchOpen((x) => !x)}
             className='box-content rounded-md p-2 transition-colors hover:bg-blue-high/10'
           >
             <img src={SearchIcon} />
@@ -237,7 +255,6 @@ export function MyTeam() {
           <Tab className='app-tab flex-1 mini-desktop:flex-initial'>
             Explore Teams
           </Tab>
-
           <div className='hidden flex-1 items-center justify-end gap-x-5 mini-desktop:flex'>
             <div className='flex max-w-[24rem] flex-1 overflow-hidden rounded-card border border-grey-high'>
               <img className='mx-4 my-3 w-6' src={SearchIcon} />
@@ -249,7 +266,6 @@ export function MyTeam() {
                 size={1}
               />
             </div>
-
             <TeamCreator>
               <button className='flex items-center gap-x-2 rounded-half bg-blue-high px-14 py-3 font-medium text-dim-black hover:bg-blue-high/80'>
                 <img className='w-6' src={PlusIcon} />
@@ -260,7 +276,7 @@ export function MyTeam() {
         </Tab.List>
         <Tab.Panels>
           <Tab.Panel>
-            <MyTeamGrid teams={showTeams}/>
+            <MyTeamGrid teams={showTeams} />
             <p>&nbsp;</p>
           </Tab.Panel>
           <Tab.Panel>
