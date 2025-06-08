@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
-import { WalletReadyState } from '@solana/wallet-adapter-base';
 
 // Extend the Window interface to include phantom
 declare global {
@@ -27,16 +24,6 @@ interface WalletModalProps {
 }
 
 const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
-    const {
-        select,
-        wallets,
-        connect,
-        connecting,
-        connected,
-        publicKey,
-        disconnect
-    } = useWallet();
-
     const [loading, setLoading] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [connectedWallets, setConnectedWallets] = useState<Record<string, string>>({});
@@ -54,7 +41,7 @@ const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
 
             // Disconnect Phantom if connected
             if (window?.phantom?.solana) {
-                window.phantom.solana.disconnect().catch(console.error);
+                window.phantom.solana.disconnect().catch(() => {});
             }
 
             // Cleanup MetaMask events
@@ -76,24 +63,16 @@ const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
             image: '/wallets/metamask.svg',
             connect: async () => {
                 if (!window.ethereum) {
-                    // window.open('https://metamask.io/download/', '_blank');
                     throw new Error('Please install MetaMask');
                 }
-
                 try {
-                    // Request accounts
                     const accounts = await window.ethereum.request({
                         method: 'eth_requestAccounts'
                     });
-
                     if (!accounts || !accounts[0]) {
                         throw new Error('No accounts found');
                     }
-
-                    // Define the handler type
                     type AccountsChangedHandler = (accounts: string[]) => void;
-
-                    // Create the handler
                     const handleAccountsChanged: AccountsChangedHandler = (accounts: string[]) => {
                         if (accounts.length === 0) {
                             console.log('Please connect to MetaMask.');
@@ -101,18 +80,13 @@ const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
                             console.log('Account changed:', accounts[0]);
                         }
                     };
-
                     if (typeof window.ethereum.removeListener === 'function') {
                         window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
                     }
-
                     if (typeof window.ethereum.on === 'function') {
                         window.ethereum.on('accountsChanged', handleAccountsChanged);
                     }
-
-                    console.log("MetaMask Connected:", accounts[0]);
                     return accounts[0];
-
                 } catch (error: any) {
                     if (error.code === 4001) {
                         throw new Error('Please connect your wallet');
@@ -120,7 +94,6 @@ const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
                     if (error.code === -32002) {
                         throw new Error('MetaMask is already processing a request');
                     }
-                    console.error('MetaMask error:', error);
                     throw new Error(error.message || 'Failed to connect to MetaMask');
                 }
             }
