@@ -1,6 +1,7 @@
-# Playmate
+# Teammate
 
-A blockchain-powered sports and social platform.
+A blockchain-powered sports and social platform. there is option to connect your wallet its a demonstration project to connect 
+different wallet with modal.
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-%23FFDD00.svg?style=flat-square&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/khemrregmii)
 
@@ -15,7 +16,7 @@ A blockchain-powered sports and social platform.
 ## Project Structure
 
 ```
-playmate/
+teammate/
   Backend/      # Node.js/Express backend
   Frontend/     # React frontend (Vite)
   README.md
@@ -25,7 +26,7 @@ playmate/
 
 ```bash
 git clone <your-repo-url>
-cd playmate
+cd teammate
 ```
 
 ## 2. Setup Environment Variables

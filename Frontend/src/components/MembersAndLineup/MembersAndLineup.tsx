@@ -21,7 +21,20 @@ import P11 from "assets/lineup/11.png";
 import P12 from "assets/lineup/12.png";
 import { useMenu } from "utils";
 
-export function MembersAndLineup({members} : any) {
+interface Member {
+  id: string;
+  fname?: string;
+  lname?: string;
+  profilePic?: string;
+  role?: string;
+  [key: string]: any;
+}
+
+interface MembersAndLineupProps {
+  members?: Member[];
+}
+
+export function MembersAndLineup({ members = [] }: MembersAndLineupProps) {
   return (
     <section className='desktop:min-w-[25rem] desktop:max-w-[25rem] relative'>
       <Tab.Group manual defaultIndex={0}>
@@ -41,7 +54,7 @@ export function MembersAndLineup({members} : any) {
   );
 }
 
-function Members({members} : any) {
+function Members({ members }: any) {
   return (
     <div className='rounded-half bg-grey-low px-5 py-5'>
       <header className='mb-7 flex flex-wrap items-center gap-x-4'>
@@ -62,48 +75,51 @@ function Members({members} : any) {
         </div>
       </header>
 
-      {
+      {members.length > 0 ? (
         members.map((member: any) => {
-          if(member.role == "Captain") {
-            return(
+          if (member.role == "Captain") {
+            return (
               <Row
-              memberPictureUrl={P02}
-              number={4}
-              name={member.fname + " " + member.lname}
-              tag={
-                <>
-                  <span className='ml-2.5 rounded-half bg-blue-high px-1.5 py-0.5 text-[0.8725rem] text-grey-high'>
-                    Captain
-                  </span>
-                </>
-              }
-            />
-            )
-          }
-          else if(member.role == "Admin") {
-            return(
+                memberPictureUrl={P02}
+                number={4}
+                name={member.fname + " " + member.lname}
+                tag={
+                  <>
+                    <span className='ml-2.5 rounded-half bg-blue-high px-1.5 py-0.5 text-[0.8725rem] text-grey-high'>
+                      Captain
+                    </span>
+                  </>
+                }
+              />
+            );
+          } else if (member.role == "Admin") {
+            return (
               <Row
-              memberPictureUrl={member.profilePic}
-              number={1}
-              name={member.fname + " " + member.lname}
-              tag={
-                <>
-                  <span className='ml-2.5 rounded-half bg-yellow px-1.5 py-0.5 text-[0.8725rem] text-grey-high'>
-                    Admin
-                  </span>
-                </>
-              }
-            />
-            )
-          }
-          else {
-            return(
-              <Row memberPictureUrl={P03} number={8} name={member.fname + " " + member.lname} />
-            )
+                memberPictureUrl={member.profilePic}
+                number={1}
+                name={member.fname + " " + member.lname}
+                tag={
+                  <>
+                    <span className='ml-2.5 rounded-half bg-yellow px-1.5 py-0.5 text-[0.8725rem] text-grey-high'>
+                      Admin
+                    </span>
+                  </>
+                }
+              />
+            );
+          } else {
+            return (
+              <Row
+                memberPictureUrl={P03}
+                number={8}
+                name={member.fname + " " + member.lname}
+              />
+            );
           }
         })
-
-      }
+      ) : (
+        <div>No members found.</div>
+      )}
 
       {/*<Row
         memberPictureUrl={P01}
