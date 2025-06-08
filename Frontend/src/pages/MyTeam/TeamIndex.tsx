@@ -15,7 +15,7 @@ import Team11 from "assets/team-11.png";
 import CopyIcon from "assets/copy.svg";
 import { useNavigate } from "react-router-dom";
 import React, { Component, useEffect, useState } from "react";
-import { useMenu } from "utils";
+import { useMenu, API_BASE_URL } from "utils";
 import { Menu, Transition } from "@headlessui/react";
 import { commonTransitionProps } from "components/PanelTransition";
 
@@ -454,13 +454,11 @@ export function TeamIndex() {
 
   function updateTeamData() {
       if(selectedTeamId != "") {
-          fetch("http://127.0.0.1:5000/getTeamData/"+selectedTeamId, {
+          fetch(`${API_BASE_URL}/getTeamData/` + selectedTeamId, {
               method: "POST",
-              crossDomain: true,
               headers: {
               "Content-Type": "application/json",
               Accept: "application/json",
-              "Access-Control-Allow-Origin": "*",
               },
               body: JSON.stringify({
               token: window.localStorage.getItem("token"),

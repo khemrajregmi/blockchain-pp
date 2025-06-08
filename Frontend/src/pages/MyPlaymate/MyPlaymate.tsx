@@ -8,6 +8,7 @@ import FilterIcon from "assets/filter.svg";
 import IconDate from "assets/input-date.svg";
 import RightArrow from "assets/right-arrow.svg";
 import CalenderComponent from "components/CalendarComponent";
+import { API_BASE_URL } from "utils";
 
 import "./styles.css";
 
@@ -20,13 +21,11 @@ import { set } from "date-fns";
 
 function ProfileBox({userData, own, friendStatus} : any) {
   const sendFriendRequest = (friendId: string) => {
-    fetch("http://127.0.0.1:5000/sendFriendRequest", {
+    fetch(`${API_BASE_URL}/sendFriendRequest`, {
         method: "POST",
-        crossDomain: true,
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
         token: window.localStorage.getItem("token"),
@@ -107,13 +106,11 @@ function Filters(props: any) {
   }
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/getTeams", {
+    fetch(`${API_BASE_URL}/getTeams`, {
       method: "POST",
-      crossDomain: true,
       headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
       token: window.localStorage.getItem("token"),
@@ -124,13 +121,11 @@ function Filters(props: any) {
       setTeams(data.data);
     });
 
-    fetch("http://127.0.0.1:5000/getSports", {
+    fetch(`${API_BASE_URL}/getSports`, {
       method: "GET",
-      crossDomain: true,
       headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "Access-Control-Allow-Origin": "*",
       }
     })
     .then((res) => res.json())
@@ -334,17 +329,15 @@ export function MyPlaymate() {
 
   useEffect(() => {
     const id = window.location.href.split("id=")[1]
-    let url = "http://127.0.0.1:5000/getUserData"
+    let url = `${API_BASE_URL}/getUserData`
     if (id) {
       url += `/${id}`
 
-      fetch("http://127.0.0.1:5000/getFriendStatus", {
+      fetch(`${API_BASE_URL}/getFriendStatus`, {
         method: "POST",
-        crossDomain: true,
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
           token: window.localStorage.getItem("token"),
@@ -359,11 +352,9 @@ export function MyPlaymate() {
 
     fetch(url, {
       method: "POST",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
         token: window.localStorage.getItem("token"),
@@ -389,14 +380,11 @@ export function MyPlaymate() {
 
   useEffect(() => {
     if(!userData) return;
-    console.log("here", userData)
-    fetch("http://127.0.0.1:5000/getEvents", {
+    fetch(`${API_BASE_URL}/getEvents`, {
       method: "POST",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
       },
       body: JSON.stringify({
         token: window.localStorage.getItem("token"),

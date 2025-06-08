@@ -16,6 +16,7 @@ import Member3 from "assets/member-3.png";
 import { DialogSheet } from "components/DialogSheet";
 
 import axios from 'axios';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function UploadBanner({bannerPicPath, onClick }: any) {
   return (
@@ -81,7 +82,7 @@ function TeamForm({ onClose, onCreate }: TeamFormProp) {
 
       try {
         const res = await axios.post(
-          "http://127.0.0.1:5000/picUpload",
+          `${API_BASE_URL}/picUpload`,
           formData
         );
         console.log(res);
@@ -107,7 +108,7 @@ function TeamForm({ onClose, onCreate }: TeamFormProp) {
 
       try {
         const res = await axios.post(
-          "http://127.0.0.1:5000/picUpload",
+          `${API_BASE_URL}/picUpload`,
           formData
         );
         console.log(res);
@@ -128,13 +129,11 @@ function TeamForm({ onClose, onCreate }: TeamFormProp) {
     if (!teamGender) setGenderError(true)
     if (!teamName || !teamGender || !selectedSportId || !profilePicPath || !bannerPicPath) return
 
-    fetch("http://127.0.0.1:5000/createTeam", {
+    fetch(`${API_BASE_URL}/createTeam`, {
         method: "POST",
-        crossDomain: true,
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
             token: window.localStorage.getItem("token"),
@@ -162,13 +161,11 @@ function TeamForm({ onClose, onCreate }: TeamFormProp) {
   }
 
   useEffect(() => {
-      fetch("http://127.0.0.1:5000/getUserData", {
+      fetch(`${API_BASE_URL}/getUserData`, {
         method: "POST",
-        crossDomain: true,
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
           token: window.localStorage.getItem("token"),
@@ -189,13 +186,11 @@ function TeamForm({ onClose, onCreate }: TeamFormProp) {
       });
 
       // Get the list of sports that exist in the database
-      fetch("http://127.0.0.1:5000/getSports", {
+      fetch(`${API_BASE_URL}/getSports`, {
           method: "GET",
-          crossDomain: true,
           headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
           }
       })
       .then((res) => res.json())
@@ -206,13 +201,11 @@ function TeamForm({ onClose, onCreate }: TeamFormProp) {
       }
       );
 
-      fetch("http://127.0.0.1:5000/getFriends", {
+      fetch(`${API_BASE_URL}/getFriends`, {
           method: "POST",
-          crossDomain: true,
           headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
           },
           body: JSON.stringify({
           token: window.localStorage.getItem("token"),

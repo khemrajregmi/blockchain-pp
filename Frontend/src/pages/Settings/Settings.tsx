@@ -25,13 +25,12 @@ function AccountSettings({userData}: any) {
     if (!firstName || !lastName || !userName) return
     console.log(firstName, lastName, userName)
 
-    fetch("http://127.0.0.1:5000/updateProfile", {
+    fetch("http://127.0.0.1:8000/updateProfile", {
       method: "POST",
       crossDomain: true,
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
+        Accept: "application/json"
       },
       body: JSON.stringify({
         token: window.localStorage.getItem("token"),

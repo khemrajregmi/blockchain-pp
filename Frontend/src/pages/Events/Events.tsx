@@ -20,6 +20,7 @@ import EventOneIcon from "../Dashboard/icons/event-one.svg";
 import EventTwoIcon from "../Dashboard/icons/event-two.svg";
 import EventThreeIcon from "../Dashboard/icons/event-three.svg";
 import { ListBox } from "components/ListBox";
+import { API_BASE_URL } from "utils";
 
 function FilterSelect(props: React.HTMLProps<HTMLButtonElement>) {
   return (
@@ -56,13 +57,11 @@ function EventFilters(props: any) {
   }
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/getSports", {
+    fetch(`${API_BASE_URL}/getSports`, {
       method: "GET",
-      crossDomain: true,
       headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "Access-Control-Allow-Origin": "*",
       }
     })
     .then((res) => res.json())
@@ -184,13 +183,11 @@ export function Events() {
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-      fetch("http://127.0.0.1:5000/getUserData", {
+      fetch(`${API_BASE_URL}/getUserData`, {
         method: "POST",
-        crossDomain: true,
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
         },
           body: JSON.stringify({
           token: window.localStorage.getItem("token"),
@@ -217,13 +214,11 @@ export function Events() {
   useEffect(() => {
     if(!userData) return;
 
-    fetch("http://127.0.0.1:5000/getEvents", {
+    fetch(`${API_BASE_URL}/getEvents`, {
         method: "POST",
-        crossDomain: true,
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
           token: window.localStorage.getItem("token"),
@@ -236,13 +231,11 @@ export function Events() {
         setLoaded(true);
     });
 
-    fetch("http://127.0.0.1:5000/getEvents", {
+    fetch(`${API_BASE_URL}/getEvents`, {
         method: "POST",
-        crossDomain: true,
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
           token: window.localStorage.getItem("token"),

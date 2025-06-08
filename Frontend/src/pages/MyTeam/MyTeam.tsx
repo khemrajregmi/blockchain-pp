@@ -6,6 +6,7 @@ import { TeamCreator } from "./TeamCreator";
 import { Link } from "react-router-dom";
 import PlusIcon from "assets/plus.svg";
 import SearchIcon from "assets/search.svg";
+import { API_BASE_URL } from "utils";
 
 import "./styles.css";
 import React, { Component, useEffect, useState } from "react";
@@ -112,13 +113,11 @@ export function MyTeam() {
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-      fetch("http://127.0.0.1:5000/getUserData", {
+      fetch(`${API_BASE_URL}/getUserData`, {
           method: "POST",
-          crossDomain: true,
           headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
           },
           body: JSON.stringify({
           token: window.localStorage.getItem("token"),
@@ -146,13 +145,11 @@ export function MyTeam() {
   useEffect(() => {
     if(!userData) return;
 
-    fetch("http://127.0.0.1:5000/getTeams", {
+    fetch(`${API_BASE_URL}/getTeams`, {
         method: "POST",
-        crossDomain: true,
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
         token: window.localStorage.getItem("token"),
@@ -166,13 +163,11 @@ export function MyTeam() {
     }
     );
 
-    fetch("http://127.0.0.1:5000/getAllTeams", {
+    fetch(`${API_BASE_URL}/getAllTeams`, {
         method: "POST",
-        crossDomain: true,
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
           token: window.localStorage.getItem("token"),

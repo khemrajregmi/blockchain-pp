@@ -118,7 +118,6 @@ export function Layout() {
           headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
           },
           body: JSON.stringify({
           token: window.localStorage.getItem("token"),
@@ -151,7 +150,6 @@ export function Layout() {
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
         token: window.localStorage.getItem("token"),
@@ -175,7 +173,6 @@ export function Layout() {
         headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
         },
         body: JSON.stringify({
         token: window.localStorage.getItem("token"),

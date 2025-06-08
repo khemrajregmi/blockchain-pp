@@ -21,6 +21,8 @@ import { TimePicker } from "components/TimePicker";
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService"
 import { LocationList } from "components/LocationList";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export function FormTraining(props: any) {
   const { setEventInfo, gameTypeError, teamError, eventNameError, dateError, startTimeError, endTimeError, locationError, costError, numPlayersError,
     setGameTypeError, setEventNameError, setDateError, setStartTimeError, setEndTimeError, setLocationError, setCostError, setNumPlayersError } = props;
@@ -68,13 +70,11 @@ export function FormTraining(props: any) {
   }, [searchKey])
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/getFriends", {
+    fetch(`${API_BASE_URL}/getFriends`, {
       method: "POST",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "  *",
       },
       body: JSON.stringify({
         token: window.localStorage.getItem("token"),
@@ -90,13 +90,11 @@ export function FormTraining(props: any) {
       }
     });
 
-    fetch("http://127.0.0.1:5000/getSports", {
+    fetch(`${API_BASE_URL}/getSports`, {
       method: "GET",
-      crossDomain: true,
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "Access-Control-Allow-Origin": "*",
       }
     })
     .then((res) => res.json())

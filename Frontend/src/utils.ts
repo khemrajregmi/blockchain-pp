@@ -1,7 +1,7 @@
 import React from "react";
 import { usePopper } from "react-popper";
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:5000";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export function useMenu(offset?: number) {
   let [referenceElem, setReferenceElem] = React.useState();

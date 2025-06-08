@@ -68,7 +68,7 @@ app.post("/register", async (req, res) => {                               // don
     }
 
     // Use environment variables for base URL
-    const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:5000';
+    const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:8000';
     const profilePics = [
       `${baseUrl}/footballer1.jpg`, 
       `${baseUrl}/footballer2.jpg`, 
@@ -94,6 +94,7 @@ app.post("/register", async (req, res) => {                               // don
 
     return res.json({ status: "ok", data: token });
   } catch (error) {
+    console.log('error yo aako', error);
     res.send({ status: "error" });
   }
 });

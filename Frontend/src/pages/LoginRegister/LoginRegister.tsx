@@ -9,6 +9,8 @@ import InputComponent from "components/InputComponent";
 import { UploadAvatar } from "components/UploadAvatar/UploadAvatar";
 import { Switch } from "components/Switch";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function Login({
   onSubmit,
   onUsernameChange,
@@ -119,7 +121,7 @@ export function LoginRegister() {
   }, [email, password]);
 
   function login() {
-    fetch("http://127.0.0.1:5000/login-user", {
+    fetch(`${API_BASE_URL}/login-user`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -145,7 +147,7 @@ export function LoginRegister() {
   }
 
   function register() {
-    fetch("http://127.0.0.1:5000/register", {
+    fetch(`${API_BASE_URL}/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
