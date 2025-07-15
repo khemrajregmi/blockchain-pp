@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { EthereumProvider } from '@walletconnect/ethereum-provider';
+import { ErrorBoundary } from './ErrorBoundary';
 
 // Extend the Window interface to include phantom
 declare global {
@@ -34,24 +35,42 @@ const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
 
         // Cleanup function
         return () => {
-            // Clear any pending timeouts
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
+            try {
+                // Clear any pending timeouts
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
 
-            // Disconnect Phantom if connected
-            if (window?.phantom?.solana) {
-                window.phantom.solana.disconnect().catch(() => {});
-            }
-
-            // Cleanup MetaMask events
-            if (window.ethereum?.removeListener) {
-                const handleAccountsChanged = (accounts: string[]) => {
-                    if (accounts.length === 0) {
-                        console.log('Please connect to MetaMask.');
+                // Disconnect Phantom if connected
+                if (window?.phantom?.solana?.disconnect) {
+                    try {
+                        const disconnectResult = window.phantom.solana.disconnect();
+                        if (disconnectResult && typeof disconnectResult.catch === 'function') {
+                            disconnectResult.catch(() => {
+                                // Silently handle disconnect errors
+                            });
+                        }
+                    } catch (error) {
+                        // Silently handle any errors during disconnect
                     }
-                };
-                window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+                }
+
+                // Cleanup MetaMask events
+                if (window?.ethereum?.removeListener) {
+                    try {
+                        const handleAccountsChanged = (accounts: string[]) => {
+                            if (accounts.length === 0) {
+                                console.log('Please connect to MetaMask.');
+                            }
+                        };
+                        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+                    } catch (error) {
+                        // Silently handle event cleanup errors
+                    }
+                }
+            } catch (error) {
+                // Silently handle any cleanup errors
+                console.warn('Error during wallet modal cleanup:', error);
             }
         };
     }, []);
@@ -238,8 +257,12 @@ const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
                     }
                     break;
                 case 'phantom':
-                    if (window.phantom?.solana) {
-                        await window.phantom.solana.disconnect();
+                    if (window.phantom?.solana?.disconnect) {
+                        try {
+                            await window.phantom.solana.disconnect();
+                        } catch (error) {
+                            console.warn('Error disconnecting Phantom wallet:', error);
+                        }
                         delete connectedWallets.phantom;
                     }
                     break;
@@ -386,4 +409,11 @@ const WalletModal = ({ isOpen, onClose }: WalletModalProps) => {
     );
 };
 
-export default WalletModal;
+// Wrap WalletModal with ErrorBoundary
+const WalletModalWithErrorBoundary = (props: WalletModalProps) => (
+    <ErrorBoundary>
+        <WalletModal {...props} />
+    </ErrorBoundary>
+);
+
+export default WalletModalWithErrorBoundary;

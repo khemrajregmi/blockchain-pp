@@ -66,7 +66,7 @@ npm start
 node app.js
 ```
 
-The backend will run on [http://127.0.0.1:5000](http://127.0.0.1:5000) by default.
+The backend will run on [http://127.0.0.1:8000](http://127.0.0.1:8000) by default.
 
 ### Start Frontend
 
@@ -75,11 +75,11 @@ cd ../Frontend
 npm run dev
 ```
 
-The frontend will run on [http://localhost:3002](http://localhost:3002) or the port specified in your `.env`.
+The frontend will run on [http://localhost:3001](http://localhost:3001) (Vite will automatically find an available port).
 
 ## 5. Open in Browser
 
-Visit [http://localhost:3002](http://localhost:3002) to use the app.
+Visit [http://localhost:3001](http://localhost:3001) to use the app, or [http://localhost:3001/login](http://localhost:3001/login) for the login page.
 
 ## Output Demo
 

@@ -2,6 +2,7 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { Layout } from "./layout/Layout";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 import { Dashboard } from "pages/Dashboard/Dashboard";
 import { Events } from "pages/Events/Events";
@@ -79,7 +80,9 @@ export function App() {
 
   return (
     <React.Fragment>
-      <RouterProvider router={router} />
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
     </React.Fragment>
   );
 }

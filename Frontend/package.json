@@ -5,7 +5,7 @@
   "type": "module",
   "homepage": ".",
   "scripts": {
-    "dev": "vite --port 3000",
+    "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "format": "prettier -uw --cache --ignore-path .prettierignore ."

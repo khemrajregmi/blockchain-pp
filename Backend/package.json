@@ -9,7 +9,8 @@
     "start:prod": "NODE_OPTIONS='--no-deprecation' node app.js",
     "migrate": "NODE_OPTIONS='--no-deprecation' node migrate.js",
     "migrate:runner": "NODE_OPTIONS='--no-deprecation' node run-migration.js",
-    "test:migration": "NODE_OPTIONS='--no-deprecation' node test-migration.js"
+    "test:migration": "NODE_OPTIONS='--no-deprecation' node test-migration.js",
+    "security:check": "node security-check.js"
   },
   "author": "adarsh",
   "license": "ISC",

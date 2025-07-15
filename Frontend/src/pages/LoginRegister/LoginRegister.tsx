@@ -167,7 +167,8 @@ export function LoginRegister() {
           window.localStorage.setItem("token", data.data);
           window.localStorage.setItem("loggedIn", "true");
 
-          window.location.href = "./../..";
+          // Redirect to dashboard after registration
+          window.location.href = "/dashboard";
         } else {
           window.localStorage.setItem("messageType", "danger");
           setPopupMessage(data.error);

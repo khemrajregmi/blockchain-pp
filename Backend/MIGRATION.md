@@ -47,6 +47,15 @@ Verifies that the migration completed successfully by:
 - Verifying expected sports are present
 - Displaying database collection status
 
+### 5. Security Check
+```bash
+npm run security:check
+```
+Scans backend files for potentially malicious code patterns:
+- Detects obfuscated JavaScript
+- Identifies suspicious patterns
+- Ensures code integrity
+
 ## Database Collections
 
 After migration, your database will have these collections:

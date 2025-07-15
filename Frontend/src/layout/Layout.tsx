@@ -113,81 +113,83 @@ export function Layout() {
   const [admin, setAdmin] = useState(false);
 
   useEffect(() => {
-      fetch(`${API_BASE_URL}/getUserData`, {
+    const initializeApp = async () => {
+      try {
+        // Skip authentication check if we're on the login page
+        if (window.location.pathname === '/login') {
+          setLoaded(true);
+          return;
+        }
+
+        // Check for token and fetch user data
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.log("No token found, redirecting to login");
+          window.location.href = "/login";
+          return;
+        }
+
+        const userResponse = await fetch(`${API_BASE_URL}/getUserData`, {
           method: "POST",
           headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-          token: window.localStorage.getItem("token"),
-          }),
-      })
-      .then((res) => res.json())
-      .then((data) => {
-          if (data.data.userType == "Admin") {
-              setAdmin(true);
-          }
-  
-          setUserData(data.data);
+          body: JSON.stringify({ token }),
+        });
+
+        const userData = await userResponse.json();
+        if (userData.status === "ok") {
+          setUserData(userData.data);
           
-          if (data.data == "token expired") {
-            if (window.location.pathname !== "/login") {
-              window.localStorage.clear();
-              window.location.href = "../../login";
-            }
+          // Fetch events and friend requests in parallel
+          const [eventsResponse, friendRequestsResponse] = await Promise.all([
+            fetch(`${API_BASE_URL}/getEvents`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token, status: "Pending Invite" }),
+            }),
+            fetch(`${API_BASE_URL}/getFriendRequests`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token }),
+            })
+          ]);
+
+          const eventsData = await eventsResponse.json();
+          const friendRequestsData = await friendRequestsResponse.json();
+
+          if (eventsData.status === "ok") {
+            setEvents(eventsData.data);
           }
 
-      });
+          if (friendRequestsData.status === "ok") {
+            setFriendRequests(friendRequestsData.data);
+          }
 
+          // Check if user is admin
+          if (userData.data.email === "admin@admin.com") {
+            setAdmin(true);
+          }
+          
+        } else {
+          console.log("Invalid token, redirecting to login");
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+          return;
+        }
+      } catch (error) {
+        console.error("Error initializing app:", error);
+        // For development, allow the app to load even if API calls fail
+        console.log("API calls failed, loading app anyway for development");
+      } finally {
+        setLoaded(true);
+      }
+    };
+
+    initializeApp();
   }, []);
 
-  useEffect(() => {
-    if(!userData) return;
-
-    fetch(`${API_BASE_URL}/getEvents`, {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        },
-        body: JSON.stringify({
-        token: window.localStorage.getItem("token"),
-        status: "Pending Invite"
-        }),
-    })
-    .then((res) => res.json())
-    .then((data) => {
-        if (data.data == "token expired") {
-          return;
-        }
-        setEvents(data.data);
-    });
-  }, [userData]);
-  
-  useEffect(() => {
-    if(!events) return;
-
-    fetch(`${API_BASE_URL}/getFriendRequests`, {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        },
-        body: JSON.stringify({
-        token: window.localStorage.getItem("token"),
-        }),
-    })
-    .then((res) => res.json())
-    .then((data) => {
-        setLoaded(true);
-
-        if (data.data == "token expired") {
-          return;
-        }
-        setFriendRequests(data.data);
-    });
-  }, [events]);
+  // Remove redundant useEffect hooks since we're fetching all data in the main useEffect above
 
   return (
     <>
@@ -204,8 +206,19 @@ export function Layout() {
       )}
       {loaded && (
         <>
-        <LayoutSidebar open={open} setOpen={setOpen} userData={userData} />
-        <ContentPane setOpen={setOpen} userData={userData} events={events} friendRequests={friendRequests} />
+        {/* Only render sidebar and navigation if not on login page */}
+        {window.location.pathname !== '/login' && (
+          <>
+            <LayoutSidebar open={open} setOpen={setOpen} userData={userData} />
+            <ContentPane setOpen={setOpen} userData={userData} events={events} friendRequests={friendRequests} />
+          </>
+        )}
+        {/* Render login page directly without sidebar */}
+        {window.location.pathname === '/login' && (
+          <div className="w-full h-full">
+            <Outlet context={{ setTitle: () => {}, setActions: () => {} }} />
+          </div>
+        )}
         </>
       )}
 

@@ -9,11 +9,11 @@ import { useEffect, useState } from "react";
 
 interface EventProps {
   iconUrl: string;
-  time: { clock: string; period: "am" | "pm" };
+  time: { clock: number; period: "am" | "pm" };
   accentColorClass: string;
 }
-
 function Event(props: EventProps & { name: string; location: string }) {
+  let clock = props.time.clock;
   return (
     <div className='mb-3 flex items-center rounded-card bg-grey-low px-5 py-3.5 desktop:min-w-[24rem]'>
       <img className='mr-4 h-8 w-8' src={props.iconUrl} />
@@ -31,7 +31,7 @@ function Event(props: EventProps & { name: string; location: string }) {
           props.accentColorClass
         )}
       >
-        {props.time.clock}
+        {clock <= 99 ? `0${clock}`.slice(-2) : clock}
         <br />
         <span className='uppercase'>{props.time.period}</span>
       </p>
@@ -39,39 +39,25 @@ function Event(props: EventProps & { name: string; location: string }) {
   );
 }
 
-export function EventList({ events, date }: any) {
+export function EventList({events, date} : any) {
   const [selectedEvents, setSelectedEvents] = useState([]);
-  
-  function convert24to12(timeString: string): { hour: string; minute: string; period: "am" | "pm" } {
-    if (!timeString) return { hour: "00", minute: "00", period: "am" };
-    
-    const [hourStr, minuteStr] = timeString.split(":");
-    let hour = parseInt(hourStr);
-    const minute = parseInt(minuteStr) || 0;
-    
-    let period: "am" | "pm" = "am";
-    
-    if (hour >= 12) {
+  function convert24to12(time: number) {
+    // time in Format: HH:MM
+
+    let hour = parseInt(time.split(":")[0]);
+    let minute = parseInt(time.split(":")[1]);
+
+    let period = "am";
+
+    if (hour > 12) {
+      hour = (hour - 12).toString();
       period = "pm";
-      if (hour > 12) {
-        hour = hour - 12;
-      }
     }
-    
-    if (hour === 0) {
-      hour = 12;
-    }
-    
-    return {
-      hour: hour.toString().padStart(2, '0'),
-      minute: minute.toString().padStart(2, '0'),
-      period
-    };
+
+    return [hour, minute, period];
   }
 
   useEffect(() => {
-    if (!events || !date) return;
-    
     let strDate = "";
     if (date.getDate() < 10) {
       strDate += `0${date.getDate()}/`
@@ -84,10 +70,9 @@ export function EventList({ events, date }: any) {
       strDate += `${date.getMonth() + 1}/`
     }
     strDate += `${date.getFullYear()}`
-    
-    const newSelectedEvents = events.filter((event: any) => event.date === strDate);
-    setSelectedEvents(newSelectedEvents);
-  }, [date, events]);
+    const newSelectedEvents = events.filter(event => event.date === strDate)
+    setSelectedEvents(newSelectedEvents)
+  }, [date, events])
 
   return (
     <section className='mt-6'>
@@ -98,31 +83,38 @@ export function EventList({ events, date }: any) {
         </Link>
       </div>
 
-      {selectedEvents.length === 0 ? (
-        <div className='rounded-card bg-grey-low px-5 py-8 text-center'>
-          <p className='text-grey-type'>No events scheduled for this day</p>
-        </div>
-      ) : (
+
+      {
         selectedEvents.map((event: any, index: number) => {
-          const timeData = convert24to12(event.startTime);
-          const icons = [EventOneIcon, EventTwoIcon, EventThreeIcon];
-          const iconUrl = icons[index % icons.length];
-          
           return (
             <Event
               key={index}
               accentColorClass='bg-yellow'
-              iconUrl={iconUrl}
-              time={{ 
-                clock: `${timeData.hour}:${timeData.minute}`, 
-                period: timeData.period 
-              }}
-              name={event.name || 'Untitled Event'}
-              location={event.location || 'Location TBA'}
+              iconUrl={EventOneIcon}
+              time={{ clock: convert24to12(event.startTime)[0] + ":" + convert24to12(event.startTime)[1], period: convert24to12(event.startTime)[2] }}
+              name={event.name}
+              location={event.location}
             />
           );
-        })
-      )}
+        }
+        )
+      }
+      {/*<Event
+        accentColorClass='bg-yellow'
+        iconUrl={EventOneIcon}
+        time={{ clock: 9, period: "am" }}
+      />
+      <Event
+        accentColorClass='bg-pink'
+        iconUrl={EventTwoIcon}
+        time={{ clock: 9, period: "am" }}
+      />
+      <Event
+        accentColorClass='bg-blue-high'
+        iconUrl={EventThreeIcon}
+        time={{ clock: 9, period: "am" }}
+      />
+      */}
     </section>
   );
 }

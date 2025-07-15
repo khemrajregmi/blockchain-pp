@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Playmate App</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .status-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin: 10px 0; 
+            border-left: 4px solid #007acc;
+        }
+        .success { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        .warning { border-left-color: #ffc107; }
+        code { 
+            background: #f8f9fa; 
+            padding: 2px 4px; 
+            border-radius: 3px; 
+            font-family: 'Courier New', monospace;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #005fa3; }
+        .test-results { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Playmate App Debug Dashboard</h1>
+    
+    <div class="status-card">
+        <h3>📍 Current Status</h3>
+        <p><strong>Frontend URL:</strong> <code>http://localhost:3001</code></p>
+        <p><strong>Backend URL:</strong> <code>http://localhost:8000</code></p>
+        <p><strong>Login Page:</strong> <code>http://localhost:3001/login</code></p>
+        <p><strong>Current Page:</strong> <span id="currentUrl"></span></p>
+    </div>
+
+    <div class="status-card">
+        <h3>🔧 Quick Tests</h3>
+        <button onclick="testBackend()">Test Backend Connection</button>
+        <button onclick="testSports()">Test Sports API</button>
+        <button onclick="testLogin()">Test Login Endpoint</button>
+        <button onclick="clearStorage()">Clear Local Storage</button>
+        <button onclick="goToLogin()">Go to Login Page</button>
+        <button onclick="goToDashboard()">Go to Dashboard</button>
+    </div>
+
+    <div class="status-card">
+        <h3>📊 Test Results</h3>
+        <div id="testResults" class="test-results">Click a test button above to see results...</div>
+    </div>
+
+    <div class="status-card">
+        <h3>🔍 Local Storage</h3>
+        <div id="storageInfo"></div>
+    </div>
+
+    <div class="status-card warning">
+        <h3>⚠️ Common Issues & Solutions</h3>
+        <ul>
+            <li><strong>Infinite loading on login:</strong> Clear local storage and try again</li>
+            <li><strong>CORS errors:</strong> Make sure backend includes port 3001 in CORS config</li>
+            <li><strong>404 errors:</strong> Frontend is running on port 3001, not 3000</li>
+            <li><strong>Authentication loop:</strong> Check if token is valid or expired</li>
+        </ul>
+    </div>
+
+    <script>
+        // Update current URL
+        document.getElementById('currentUrl').textContent = window.location.href;
+
+        // Update storage info
+        function updateStorageInfo() {
+            const storage = document.getElementById('storageInfo');
+            const token = localStorage.getItem('token');
+            const loggedIn = localStorage.getItem('loggedIn');
+            
+            storage.innerHTML = `
+                <p><strong>Token:</strong> ${token ? token.substring(0, 50) + '...' : 'None'}</p>
+                <p><strong>Logged In:</strong> ${loggedIn || 'false'}</p>
+                <p><strong>Storage Keys:</strong> ${Object.keys(localStorage).join(', ') || 'None'}</p>
+            `;
+        }
+        updateStorageInfo();
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            results.textContent += `[${timestamp}] ${icon} ${message}\n`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        async function testBackend() {
+            log('Testing backend connection...');
+            try {
+                const response = await fetch('http://localhost:8000/getSports');
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Backend is running! Found ${data.data.length} sports types`, 'success');
+                } else {
+                    log(`Backend responded with status: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`Backend connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSports() {
+            log('Testing sports API...');
+            try {
+                const response = await fetch('http://localhost:8000/getSports');
+                const data = await response.json();
+                if (data.status === 'ok') {
+                    log(`Sports API working! Sports: ${data.data.map(s => s.name).join(', ')}`, 'success');
+                } else {
+                    log('Sports API returned error status', 'error');
+                }
+            } catch (error) {
+                log(`Sports API test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            log('Testing login endpoint with dummy data...');
+            try {
+                const response = await fetch('http://localhost:8000/login-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'test@test.com', password: 'test123' })
+                });
+                const data = await response.json();
+                log(`Login endpoint responded: ${JSON.stringify(data)}`, 
+                    data.error ? 'success' : 'error'); // "User Not found" is expected
+            } catch (error) {
+                log(`Login test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function clearStorage() {
+            localStorage.clear();
+            log('Local storage cleared', 'success');
+            updateStorageInfo();
+        }
+
+        function goToLogin() {
+            window.location.href = '/login';
+        }
+
+        function goToDashboard() {
+            window.location.href = '/dashboard';
+        }
+
+        // Auto-refresh storage info every 2 seconds
+        setInterval(updateStorageInfo, 2000);
+    </script>
+</body>
+</html>
