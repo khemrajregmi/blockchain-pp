@@ -11,7 +11,7 @@ import Team2 from "assets/team-2.png";
 import Team10 from "assets/team-10.png";
 import Team11 from "assets/team-11.png";
 import CopyIcon from "assets/copy.svg";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useMenu } from "utils";
 import { API_BASE_URL } from "utils";
@@ -107,15 +107,15 @@ function TopBlock({teamData} : any) {
         </div>
         <div className='flex flex-wrap gap-x-6 gap-y-4 sm:order-1 sm:shrink-0 sm:flex-nowrap'>
           <div className='pm-stat'>
-            <h3>18</h3>
+            <h3>{teamData.memberCount || 0}</h3>
             <p>Members</p>
           </div>
           <div className='pm-stat'>
-            <h3>281</h3>
+            <h3>0</h3>
             <p>Games played</p>
           </div>
           <div className='pm-stat'>
-            <h3>77.5%</h3>
+            <h3>0%</h3>
             <p>Win rate</p>
           </div>
         </div>
@@ -275,8 +275,9 @@ function Information() {
 
 export function TeamIndex() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [selectedTeamId, setSelectedTeamId] = useState<string>(window.location.href.split("id=")[1] || "");
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(searchParams.get("id") || "");
   const [loaded, setLoaded] = useState(false);
   const [loadedTeamData, setLoadedTeamData] = useState(false);
   const [teamsData, setTeamsData] = useState<Team[]>([]);
@@ -448,17 +449,17 @@ export function TeamIndex() {
 
   useEffect(() => {
       // Try to get team id from URL if available
-      const urlTeamId = window.location.href.split("id=")[1];
-      if(selectedTeamId == "" && urlTeamId !== undefined) {
+      const urlTeamId = searchParams.get("id");
+      if(selectedTeamId == "" && urlTeamId !== null) {
           setSelectedTeamById(urlTeamId);
-      } else if (selectedTeamId == "" && urlTeamId === undefined) {
+      } else if (selectedTeamId == "" && urlTeamId === null) {
           if(teamsData.length > 0) {
               setSelectedTeamById(teamsData[0].id);
 
               setLoaded(true);
           }
       }
-  }, [teamsData, loaded]);
+  }, [teamsData, loaded, searchParams]);
 
   useEffect(() => {
       updateTeamData();
@@ -553,21 +554,30 @@ export function TeamIndex() {
             </svg>
           </button>
           <span className='font-light text-grey-type'>My Team</span>&nbsp;
-          <span>/ Team Page</span>
+          <span>/ {teamData?.name || 'Team Page'}</span>
         </div>
       }
     >
-      <div className='grid max-w-full grid-cols-1 gap-x-5 gap-y-10 desktop:grid-cols-[minmax(0,1fr)_auto]'>
-        <div>
-          <TopBlock teamData={teamData} />
+      {loadedTeamData && teamData ? (
+        <div className='grid max-w-full grid-cols-1 gap-x-5 gap-y-10 desktop:grid-cols-[minmax(0,1fr)_auto]'>
+          <div>
+            <TopBlock teamData={teamData} />
+          </div>
+          <div className='col-0 desktop:col-1 desktop:row-span-2'>
+            <MembersAndLineup members={membersData} />
+          </div>
+          <div>
+            <Information />
+          </div>
         </div>
-        <div className='col-0 desktop:col-1 desktop:row-span-2'>
-          <MembersAndLineup members={membersData} />
+      ) : (
+        <div className='flex h-64 items-center justify-center'>
+          <div className='text-center'>
+            <div className='mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-high border-t-transparent'></div>
+            <p className='text-grey-type'>Loading team data...</p>
+          </div>
         </div>
-        <div>
-          <Information />
-        </div>
-      </div>
+      )}
     </PageView>
   );
 }

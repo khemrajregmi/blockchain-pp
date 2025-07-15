@@ -63,15 +63,25 @@ function RecentActivities({ activities }: { activities: RecentActivity[] }) {
   );
 }
 
-function MainContent({ userData, stats, friendRequests }: { userData: any; stats: DashboardStats; friendRequests: any[] }) {
+function MainContent({ userData, stats, friendRequests, teams }: { userData: any; stats: DashboardStats; friendRequests: any[]; teams: any[] }) {
   const navigate = useNavigate();
+
+  const handleTeamNavigation = () => {
+    if (teams.length === 1) {
+      // If user has only one team, go directly to that team
+      navigate(`/team/index?id=${teams[0].id}`);
+    } else {
+      // If user has multiple teams or no teams, go to team listing
+      navigate('/team');
+    }
+  };
 
   return (
     <section className='grid grid-cols-4 grid-rows-[repeat(2,auto)] gap-5'>
       <div 
         role='button' 
         className='dashboard-majar-card bg-blue-high cursor-pointer'
-        onClick={() => navigate('/my-playmate')}
+        onClick={() => navigate('/playmate/index')}
       >
         <h1>My Playmate</h1>
         <p>
@@ -89,7 +99,7 @@ function MainContent({ userData, stats, friendRequests }: { userData: any; stats
       <div 
         role='button' 
         className='dashboard-majar-card bg-yellow cursor-pointer'
-        onClick={() => navigate('/create-event')}
+        onClick={() => navigate('/events')}
       >
         <h1>Create Event</h1>
         <p>
@@ -116,12 +126,14 @@ function MainContent({ userData, stats, friendRequests }: { userData: any; stats
       </button>
       <button 
         className='dashboard-actions group'
-        onClick={() => navigate('/teams')}
+        onClick={handleTeamNavigation}
       >
         <div className='group-hover:bg-blue-high/20'>
           <img src={TeamIcon} />
         </div>
-        <span>Join a team ({stats.teamsCount})</span>
+        <span>
+          {stats.teamsCount > 0 ? `View teams (${stats.teamsCount})` : 'Join a team'}
+        </span>
       </button>
       <BalanceTrigger />
       <button 
@@ -370,7 +382,7 @@ export function Dashboard() {
     <PageView title={`Welcome ${userData?.fname || 'User'}`}>
       {loaded ? (
         <div className='flex flex-col gap-x-5 gap-y-16 desktop:flex-row desktop:items-start'>
-          <MainContent userData={userData} stats={stats} friendRequests={friendRequests} />
+          <MainContent userData={userData} stats={stats} friendRequests={friendRequests} teams={teams} />
           <SideView events={events} userData={userData} friendRequests={friendRequests} />
         </div>
       ) : (
