@@ -81,10 +81,7 @@ The frontend will run on [http://localhost:3001](http://localhost:3001) (Vite wi
 
 Visit [http://localhost:3001](http://localhost:3001) to use the app, or [http://localhost:3001/login](http://localhost:3001/login) for the login page.
 
-## Output Demo
 
-Watch a demo of the project here:  
-👉 [https://www.loom.com/share/c5dd238419d84a82a341ee5c9c1032df?sid=f9c99f38-87fb-42a8-8fe6-4fa7be840344](https://www.loom.com/share/c5dd238419d84a82a341ee5c9c1032df?sid=f9c99f38-87fb-42a8-8fe6-4fa7be840344)
 
 ## Troubleshooting
 
