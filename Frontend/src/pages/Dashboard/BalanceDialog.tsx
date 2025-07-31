@@ -80,14 +80,12 @@ function DialogContent({ onClose }: DialogContentProps) {
       </Dialog.Title>
 
       <div className='mt-5 rounded-2.5xl border border-grey-high px-6 py-3 text-center text-lg desk-dialog:mx-32'>
-        You owe a total of <span className='font-bold text-blue-high'>$0</span>
+        You owe a total of <span className='font-bold text-blue-high'>$85</span>
       </div>
 
       <section className='mt-12 flex flex-col gap-y-8 desk-dialog:gap-y-5'>
-        <div className='rounded-card bg-grey-low px-6 py-8 text-center'>
-          <p className='text-grey-type'>No pending payments</p>
-          <p className='mt-2 text-sm text-grey-subtle'>You're all caught up!</p>
-        </div>
+        <PaymentBlock pendingAmount={47} />
+        <PaymentBlock pendingAmount={17} />
       </section>
 
       <footer className='mt-14 flex flex-wrap gap-x-7 gap-y-4 sm:justify-center'>

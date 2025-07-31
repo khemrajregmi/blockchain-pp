@@ -1,15 +1,6 @@
 // Load environment variables
 require('dotenv').config();
 
-// Suppress specific deprecation warnings
-process.removeAllListeners('warning');
-process.on('warning', (warning) => {
-  // Only show warnings that are not deprecation warnings
-  if (warning.name !== 'DeprecationWarning') {
-    console.warn(warning.name, warning.message);
-  }
-});
-
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -20,7 +11,7 @@ app.use(express.static("public"));
 app.use(express.json());
 const cors = require("cors");
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://127.0.0.1:3000", "http://127.0.0.1:3001", "http://127.0.0.1:3002"], // allow your frontend dev server
+  origin: ["http://localhost:3001", "http://localhost:3002", "http://127.0.0.1:3001", "http://127.0.0.1:3002"], // allow your frontend dev server
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -38,7 +29,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "hvdvay6ert72839289()aiyg8t87qt7239
 const mongoUrl = process.env.MONGODB_URL || "mongodb+srv://mcplustexturepack:6BV8j5QJWAxy5va@cluster0.528peek.mongodb.net/?retryWrites=true&w=majority";
 
 mongoose
-  .connect(mongoUrl)
+  .connect(mongoUrl, {
+    useNewUrlParser: true,
+  })
   .then(() => {
     console.log("Connected to database");
   })

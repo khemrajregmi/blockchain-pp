@@ -20,7 +20,10 @@ const Sports = mongoose.model("SportsTypes");
 
 // Connect to MongoDB
 mongoose
-  .connect(mongoUrl)
+  .connect(mongoUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("Connected to database");
     runMigrations();

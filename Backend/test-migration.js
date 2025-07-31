@@ -13,7 +13,10 @@ const Sports = mongoose.model("SportsTypes");
 
 async function testMigration() {
   try {
-    await mongoose.connect(mongoUrl);
+    await mongoose.connect(mongoUrl, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
     console.log("🔗 Connected to database");
 
